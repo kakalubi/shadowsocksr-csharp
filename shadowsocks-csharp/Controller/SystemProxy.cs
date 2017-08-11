@@ -525,7 +525,13 @@ namespace Shadowsocks.Controller
                 sysProxyMode = (int)ProxyMode.Direct;
             }
             bool global = sysProxyMode == (int)ProxyMode.Global;
+            bool NSKJapan = sysProxyMode == (int)ProxyMode.NSKJapan;
+            bool NSKChina = sysProxyMode == (int)ProxyMode.NSKChina;
+
             bool enabled = sysProxyMode != (int)ProxyMode.Direct;
+
+
+
             Version win8 = new Version("6.2");
             //if (Environment.OSVersion.Version.CompareTo(win8) < 0)
             {
@@ -540,6 +546,17 @@ namespace Shadowsocks.Controller
                                 RegistrySetValue(registry, "ProxyEnable", 1);
                                 RegistrySetValue(registry, "ProxyServer", "127.0.0.1:" + config.localPort.ToString());
                                 RegistrySetValue(registry, "AutoConfigURL", "");
+                            }else if (NSKJapan)
+                            {
+                                RegistrySetValue(registry, "ProxyEnable", 0);
+                                RegistrySetValue(registry, "ProxyServer", "");
+                                RegistrySetValue(registry, "AutoConfigURL", "http://proxy.nsk.com:8888/proxy.pac");
+                            }
+                            else if (NSKChina)
+                            {
+                                RegistrySetValue(registry, "ProxyEnable", 0);
+                                RegistrySetValue(registry, "ProxyServer", "");
+                                RegistrySetValue(registry, "AutoConfigURL", "http://cn-proxy.asia.ad.nsk.com/proxy.pac");
                             }
                             else
                             {
@@ -547,6 +564,8 @@ namespace Shadowsocks.Controller
                                 pacUrl = "http://127.0.0.1:" + config.localPort.ToString() + "/pac?" + "auth=" + config.localAuthPassword + "&t=" + Util.Utils.GetTimestamp(DateTime.Now);
                                 RegistrySetValue(registry, "ProxyEnable", 0);
                                 RegistrySetValue(registry, "ProxyServer", "");
+                               // pacUrl = "http://proxy.nsk.com:8888/proxy.pac";
+
                                 RegistrySetValue(registry, "AutoConfigURL", pacUrl);
                             }
                         }
@@ -569,7 +588,7 @@ namespace Shadowsocks.Controller
                     }
                 }
             }
-            if (Environment.OSVersion.Version.CompareTo(win8) >= 0)
+            if (Environment.OSVersion.Version.CompareTo(win8) >= 0 && !(NSKChina || NSKJapan))// 
             {
                 try
                 {
@@ -579,10 +598,20 @@ namespace Shadowsocks.Controller
                         {
                             WinINet.SetIEProxy(true, true, "127.0.0.1:" + config.localPort.ToString(), "");
                         }
+                        else if (NSKJapan)
+                        {
+                            WinINet.SetIEProxy(true, false, "", "http://proxy.nsk.com:8888/proxy.pac");
+                        }
+                        else if (NSKChina)
+                        {
+                            WinINet.SetIEProxy(true, false, "", "http://cn-proxy.asia.ad.nsk.com/proxy.pac");
+                           
+                        }
                         else
                         {
                             string pacUrl;
                             pacUrl = $"http://127.0.0.1:{config.localPort}/pac?auth={config.localAuthPassword}&t={Util.Utils.GetTimestamp(DateTime.Now)}";
+                            //pacUrl = "http://proxy.nsk.com:8888/proxy.pac";
                             WinINet.SetIEProxy(true, false, "", pacUrl);
                         }
                     }
@@ -651,7 +680,7 @@ namespace Shadowsocks.Controller
             BytePushback(buffer, ref buffer_len, counter + 1);
             if (sysProxyMode == (int)ProxyMode.Direct)
                 BytePushback(buffer, ref buffer_len, 1);
-            else if (sysProxyMode == (int)ProxyMode.Pac)
+            else if (sysProxyMode == (int)ProxyMode.Pac || sysProxyMode == (int)ProxyMode.NSKChina || sysProxyMode == (int)ProxyMode.NSKJapan)
                 BytePushback(buffer, ref buffer_len, 5);
             else
                 BytePushback(buffer, ref buffer_len, 3);
@@ -664,6 +693,16 @@ namespace Shadowsocks.Controller
 
             string pacUrl = "";
             pacUrl = "http://127.0.0.1:" + config.localPort.ToString() + "/pac?" + "auth=" + config.localAuthPassword + "&t=" + Util.Utils.GetTimestamp(DateTime.Now);
+            if (sysProxyMode == (int) ProxyMode.NSKJapan)
+            {
+                pacUrl = "http://proxy.nsk.com:8888/proxy.pac";
+            }
+            if (sysProxyMode == (int)ProxyMode.NSKChina)
+            {
+                pacUrl = "http://cn-proxy.asia.ad.nsk.com/proxy.pac";
+            }
+
+
             BytePushback(buffer, ref buffer_len, pacUrl);
 
             buffer_len += 0x20;

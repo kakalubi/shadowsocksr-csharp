@@ -15,6 +15,8 @@ namespace Shadowsocks.Controller
         Direct,
         Pac,
         Global,
+        NSKJapan,
+        NSKChina
     }
 
     public class ShadowsocksController

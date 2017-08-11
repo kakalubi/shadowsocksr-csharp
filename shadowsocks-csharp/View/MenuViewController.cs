@@ -36,6 +36,8 @@ namespace Shadowsocks.View
         private MenuItem enableItem;
         private MenuItem PACModeItem;
         private MenuItem globalModeItem;
+        private MenuItem NSKJapanItem;
+        private MenuItem NSKChinaItem;
         private MenuItem modeItem;
 
         private MenuItem ruleBypassLan;
@@ -217,6 +219,9 @@ namespace Shadowsocks.View
                     enableItem = CreateMenuItem("Disable system proxy", new EventHandler(this.EnableItem_Click)),
                     PACModeItem = CreateMenuItem("PAC", new EventHandler(this.PACModeItem_Click)),
                     globalModeItem = CreateMenuItem("Global", new EventHandler(this.GlobalModeItem_Click)),
+                    NSKJapanItem = CreateMenuItem("NSKJapan", new EventHandler(this.NSKJapanItem_Click)),
+                    NSKChinaItem = CreateMenuItem("NSKChina", new EventHandler(this.NSKChinaItem_Click)),
+
                     new MenuItem("-"),
                     noModifyItem = CreateMenuItem("No modify system proxy", new EventHandler(this.NoModifyItem_Click))
                 }),
@@ -589,6 +594,9 @@ namespace Shadowsocks.View
             enableItem.Checked = config.sysProxyMode == (int)ProxyMode.Direct;
             PACModeItem.Checked = config.sysProxyMode == (int)ProxyMode.Pac;
             globalModeItem.Checked = config.sysProxyMode == (int)ProxyMode.Global;
+            NSKJapanItem.Checked = config.sysProxyMode == (int)ProxyMode.NSKJapan;
+            NSKChinaItem.Checked  = config.sysProxyMode == (int)ProxyMode.NSKChina;
+
         }
 
         private void UpdateProxyRule(Configuration config)
@@ -985,6 +993,15 @@ namespace Shadowsocks.View
         private void PACModeItem_Click(object sender, EventArgs e)
         {
             controller.ToggleMode(ProxyMode.Pac);
+        }
+
+        private void NSKJapanItem_Click(object sender, EventArgs e)
+        {
+            controller.ToggleMode(ProxyMode.NSKJapan);
+        }
+        private void NSKChinaItem_Click(object sender, EventArgs e)
+        {
+            controller.ToggleMode(ProxyMode.NSKChina);
         }
 
         private void RuleBypassLanItem_Click(object sender, EventArgs e)
